@@ -25,15 +25,3 @@ variable "vault_token" {
   default     = "VAULT_UTRAINS_TOKEN"
   type        = string
 }
-
-# Secret that will be used to connect to the JFrog server, from our Jenkins server.  
-variable "jfrog_secret_username_and_password" {
-  description = "JFrog secret username"
-  type        = list(string)
-}
-
-
-variable "jfrog_secret_token" {
-  description = "JFrog secret token"
-  type        = string
-}

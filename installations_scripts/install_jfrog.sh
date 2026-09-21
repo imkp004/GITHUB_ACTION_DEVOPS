@@ -14,7 +14,7 @@ CYAN_COLOR_STARTING='\033[1;36m'
 RED_COLOR_FAILLED='\033[1;31m'
 COLOR_RESET_OF='\033[0m'
 
-JAVA_AND_MAVEN_PATH_FILE=java_path.sh
+
 PROFILES_USERS_DIR=/etc/profile.d
 
 # JFROG Variables
@@ -36,11 +36,6 @@ confirm_installation_step () {
 	fi
 }
 
-if [ -f $PROFILES_USERS_DIR/$JAVA_AND_MAVEN_PATH_FILE ]; then
-    echo -e "${CYAN_COLOR_STARTING} >>>>>>>>>>>>>>>> RELOADING JAVA ENV FOR JFROG <<<<<<<<<<<<<<<< ${COLOR_RESET_OF}"
-	source $PROFILES_USERS_DIR/$JAVA_AND_MAVEN_PATH_FILE    
-	echo echo -e "${CYAN_COLOR_STARTING} >>>>>>>>>>>>>>>> JAVA PATH IS : $JAVA_HOME  <<<<<<<<<<<<<<<< ${COLOR_RESET_OF}"                                                                               #                                                                                             
-fi
 
 # Step 1 : Install Java 11, and config JAVA_HOME environment variable
 echo -e "${CYAN_COLOR_STARTING} ---------------- STEP 1 : JFROG DAEMOND CONFIG ---------------- ${COLOR_RESET_OF}"

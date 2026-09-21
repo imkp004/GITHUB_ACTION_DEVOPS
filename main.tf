@@ -161,18 +161,6 @@ resource "aws_instance" "main-server" {
     Environment = "dev"
   }
 
-  #   provisioner "file" {
-  #   source      = "${path.module}/installations_scripts"
-  #   destination = "/home/ec2-user/"
-
-  #   connection {
-  #     type = "ssh"
-  #     user = "ec2-user"
-  #     private_key = tls_private_key.ec2-key.private_key_pem
-  #     host        = self.public_ip
-  #     timeout     = "1m"
-  #   }
-  # }
 }
 resource "null_resource" "copy_scripts" {
   connection {
@@ -235,20 +223,14 @@ resource "null_resource" "name" {
     inline = [
       "ls",
       "pwd",
-      "sh installations_scripts/install_java.sh",
 
       "sh installations_scripts/install_jfrog.sh",    
-      
-
-
-      # # Install Trivy
-      "sudo sh installations_scripts/install_trivy.sh",
 
       # Install SonarQube
       "sudo sh installations_scripts/install_sonar_using_docker.sh",
       
-      # Install Vault, then create a policy and a token for allow Jenkins to access the secrets in vault
-      "sudo sh installations_scripts/install_vault.sh ${var.jfrog_secret_username_and_password[0]} ${var.jfrog_secret_username_and_password[1]} ${var.jfrog_secret_token} ",
+      # Install Vault
+      "sudo sh installations_scripts/install_vault.sh",
     ]
     
   }
