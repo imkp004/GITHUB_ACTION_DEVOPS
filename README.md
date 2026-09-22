@@ -28,6 +28,7 @@ Run `terraform output` to get the URLs and SSH command for the instance.
 1. Open `JFROG_URL` (port `8082`).
 2. Log in with `admin` / `password`.
 3. When prompted, set the new password to `DevOps1234`.
+4. Create a local repository. Name: `devops-project`, Type `Generic`
 
 ### 2. Vault
 
@@ -41,7 +42,7 @@ Run `terraform output` to get the URLs and SSH command for the instance.
 
 In the Vault UI, browse the `secrets/` KV engine to `creds/jfrog` — it should show `username=admin`, `password=Devops1234` (or run `vault kv get secrets/creds/jfrog`).
 
-### 4. SonarQube
+### 4. SonarQube (Optional: Skip this if you are using SonarCloud )
 
 Open `sonarqube_url` (port `9000`), log in with `admin` / `admin`, and set a new password.
 
