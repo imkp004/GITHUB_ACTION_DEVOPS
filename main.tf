@@ -65,6 +65,13 @@ resource "aws_security_group" "web-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
+    description = "Jenkins Port"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
     description = "Jfrog Port"
     from_port   = 8082
     to_port     = 8082
@@ -121,13 +128,28 @@ resource "aws_security_group" "web-sg" {
   }
 
   tags = {
-    Name = "Vault-trivy-jfrog-SG"
-    Owner = "Utrains"
+    Name = "jenkins-jfrog-SG"
+    Owner = "Hermann90"
   }
 }
 
 
 #data for amazon linux
+# data "aws_ami" "amazon_linux_2" {
+#   most_recent = true
+#   owners      = ["amazon"]
+
+#   filter {
+#     name   = "name"
+#     values = ["amzn2-ami-hvm*"]
+#   }
+
+#   filter {
+#     name   = "architecture"
+#     values = ["x86_64"]
+#   }
+# }
+
 data "aws_ssm_parameter" "amzn2023" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
@@ -147,7 +169,7 @@ resource "aws_instance" "main-server" {
   
 
   # Attach role to Ec2 instance
-  iam_instance_profile = aws_iam_instance_profile.instance_profile.name
+  iam_instance_profile = aws_iam_instance_profile.jenkins_instance_profile.name
 
   # Set the instance's root volume to 50 GB
   root_block_device {
@@ -161,22 +183,18 @@ resource "aws_instance" "main-server" {
     Environment = "dev"
   }
 
-}
-resource "null_resource" "copy_scripts" {
-  connection {
-    type        = "ssh"
-    user        = "ec2-user"
-    private_key = tls_private_key.ec2-key.private_key_pem
-    host        = aws_instance.main-server.public_ip
-    timeout     = "5m"
-  }
-
-  provisioner "file" {
+    provisioner "file" {
     source      = "${path.module}/installations_scripts"
     destination = "/home/ec2-user/"
-  }
 
-  depends_on = [aws_instance.main-server, local_file.ssh_key]
+    connection {
+      type = "ssh"
+      user = "ec2-user"
+      private_key = file(local_file.ssh_key.filename)
+      host        = self.public_ip
+      timeout     = "1m"
+    }
+  }
 }
 
 # This Null Resource can install dos2unix and Docker
@@ -223,14 +241,21 @@ resource "null_resource" "name" {
     inline = [
       "ls",
       "pwd",
+      "sh installations_scripts/install_java.sh",
 
       "sh installations_scripts/install_jfrog.sh",    
+      
+      # Jenkins configuration
+      "sudo sh installations_scripts/install_jenkins.sh",
+
+      # # Install Trivy
+      "sudo sh installations_scripts/install_trivy.sh",
 
       # Install SonarQube
       "sudo sh installations_scripts/install_sonar_using_docker.sh",
       
-      # Install Vault
-      "sudo sh installations_scripts/install_vault.sh",
+      # Install Vault, then create a policy and a token for allow Jenkins to access the secrets in vault
+      "sudo sh installations_scripts/install_vault.sh ${var.jfrog_secret_username_and_password[0]} ${var.jfrog_secret_username_and_password[1]} ${var.jfrog_secret_token} ",
     ]
     
   }
@@ -247,4 +272,3 @@ resource "null_resource" "fetch_remote_file" {
 
    depends_on = [null_resource.name]
  }
-
