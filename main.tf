@@ -163,7 +163,7 @@ data "aws_ssm_parameter" "amzn2023" {
 resource "aws_instance" "main-server" {
   ami                    = data.aws_ssm_parameter.amzn2023.value
   instance_type          = var.aws_instance_type_server
-  subnet_id              = aws_subnet.web-subnet.id
+  subnet_id              = aws_subnet.web-subnet.id 
   vpc_security_group_ids = [aws_security_group.web-sg.id]
   key_name               = aws_key_pair.ec2-key.key_name
   
